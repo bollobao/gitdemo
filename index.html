@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>图片搜索App</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="./axios.js"></script>
+</head>
+<style>
+    .alert {
+        text-align: center;
+        display: none;
+    }
+</style>
+
+<body>
+    <h1>图片搜索</h1>
+    <form>
+        <input type="text" id="search-input" placeholder="搜索图片" />
+        <button id="search-button">搜索</button>
+    </form>
+    <div class="search-results">
+        <!-- <div class="search-result">
+            <img src="https://plus.unsplash.com/premium_photo-1664361480561-3bdcd6eb3b6f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8bmF0dXJlfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=1000&q=60"
+                alt="image" />
+            <a href="https://unsplash.com/photos/g-7X6T7vAI4" target="_blank" rel="noopener noreferrer">an image of a
+                beach</a>
+        </div>
+        <div class="search-result">
+            <img src="https://plus.unsplash.com/premium_photo-1664361480561-3bdcd6eb3b6f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8bmF0dXJlfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=1000&q=60"
+                alt="image" />
+            <a href="https://unsplash.com/photos/g-7X6T7vAI4" target="_blank" rel="noopener noreferrer">an image of a
+                beach</a>
+        </div>
+        <div class="search-result">
+            <img src="https://plus.unsplash.com/premium_photo-1664361480561-3bdcd6eb3b6f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8bmF0dXJlfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=1000&q=60"
+                alt="image" />
+            <a href="https://unsplash.com/photos/g-7X6T7vAI4" target="_blank" rel="noopener noreferrer">an image of a
+                beach</a>
+        </div> -->
+    </div>
+    <button id="show-more-button">显示更多</button>
+    <div class="alert">没有搜到任何相关数据！请换一个关键词</div>
+</body>
+<script>
+    const showMore = document.querySelector('#show-more-button')
+    
+    let page = 1
+    async function gatData(page = 1) {
+        let res = await axios.get('https://jsonplaceholder.typicode.com/photos', {
+            params: {
+                _page: page,
+                _limit: 21,
+                title_like: document.querySelector('#search-input').value
+            }
+        })
+        console.log(res.data);
+        return res.data
+    }
+
+    async function render() {
+        let data = await gatData(page)
+        if (data.length == 0) {
+            document.querySelector('.alert').style.display = 'block'
+            showMore.style.display = 'none'
+        } else {
+            document.querySelector('.search-results').innerHTML += data.map(item =>
+                `
+            <div class="search-result">
+                <img src="${item.thumbnailUrl}"
+                    alt="image" />
+                <a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.title}</a>
+            </div>
+            `
+            ).join('')
+            showMore.style.display = 'block'
+        }
+    }
+
+    document.querySelector('#search-button').addEventListener('click', async function (e) {
+        if (document.querySelector('#search-input').value) {
+            e.preventDefault()
+            await render()
+        } else {
+            alert('请输入搜索关键词！')
+        }
+    })
+
+    document.querySelector('#show-more-button').addEventListener('click', async function (e) {
+        e.preventDefault()
+        page++
+        await render()
+    })
+</script>
+
+</html>
